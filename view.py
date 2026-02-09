@@ -27,7 +27,9 @@ def menu_build(
 #Функция для показа меню ботов
 def create_bot_menu():
 	return InlineKeyboardMarkup(menu_build(
-		[], #Обычные боты
+		[	#Добавление ботов
+			InlineKeyboardButton("chatGPT", callback_data="action:activateChatGPT")
+		],
 		n_cols=1, #Число кнопок в колонке
 		header_buttons=InlineKeyboardButton("⭐ Приветствие", callback_data="action:helloButton") #  action:helloButton - уникальная строка с "action:метод"
 	))

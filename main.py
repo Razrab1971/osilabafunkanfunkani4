@@ -7,6 +7,7 @@ import view
 # Для каждой отдельной логики бота
 # Создавать свой файл с логикой функции
 from buttons.helloButton import helloButton
+from buttons.chatGPT import activateChatGPT
 
 
 
@@ -40,6 +41,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 				text="Продолжим ?",
 				reply_markup=view.create_bot_menu()
 		)
+	elif data == "action:activateChatGPT":
+		await activateChatGPT(update, context)
 
 
 
