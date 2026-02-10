@@ -46,6 +46,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+
+
 #Оставлю для тестов ботовотсва
 TOKEN = '8342225271:AAG21KFoKOsJPl9fxvyHEDXkw8_LD8uZJ9A'
 

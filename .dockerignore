@@ -1,0 +1,15 @@
+# Виртуальное окружение
+venv/
+.env
+
+# Кэш Python
+__pycache__/
+buttons/__pycache__/
+*.pyc
+
+# Файлы Git
+.git
+.gitignore
+
+#Сам файл
+.dockerignore
