@@ -1,3 +1,5 @@
-buttons/__pycache__/*
-__pycache__/*
+#Кеши сборки
+**/__pycache__/
+
+#Хлам
 venv/*

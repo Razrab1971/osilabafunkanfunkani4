@@ -3,9 +3,9 @@ venv/
 .env
 
 # Кэш Python
-__pycache__/
-buttons/__pycache__/
-*.pyc
+telegram_bot/__pycache__/
+telegram_bot/buttons/__pycache__/
+telegram_bot/*.pyc
 
 # Файлы Git
 .git

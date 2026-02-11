@@ -1,3 +1,18 @@
+# -- Сборщик --
+FROM debian:bookworm-slim AS builder
+
+RUN apt-get update && apt-get install -y \
+   g++ \
+   && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY dop_application/. .
+
+RUN g++ shifr.cpp -o shifr
+
+
+
+# -- Основная система --
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -8,11 +23,11 @@ RUN apt-get update && apt-get install -y \
 	&& rm -rf var/lib/apt/lists/*
 
 
-COPY requirements.txt .
+COPY telegram_bot/requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-
-COPY . .
+COPY --from=builder build/shifr .
+COPY telegram_bot/. .
 
 
 RUN \
