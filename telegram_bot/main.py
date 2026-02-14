@@ -2,12 +2,16 @@ import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, ContextTypes
 
+from authenticate_db import init_db, get_main_db, get_user_id, registrate_user  
+
+
 import view
 
 # Для каждой отдельной логики бота
-# Создавать свой файл с логикой функции
-from buttons.helloButton import helloButton
-from buttons.chatGPT import activateChatGPT
+# Создавать свой файл с логикой функции по типу раздела {LLM, text2image, text2video, second2all}
+from buttons.helloButton import helloButton, buttonInfoBot
+from buttons.buttonsLLM import * 
+from buttons.authenticate_buttons import get_authenticate_handler
 
 
 
@@ -19,6 +23,20 @@ logging.basicConfig(
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+	
+	#Регистрация пользователя
+
+	db = get_main_db()
+	logging.info(
+		f"Регистрация пользователя: {
+			not await registrate_user(
+				db,
+				get_user_id(update),
+				update.effective_user.first_name
+			)
+		}",
+	)
+
 	await update.message.reply_text(
 			"Начнём ?",
 			reply_markup=view.create_bot_menu()
@@ -26,24 +44,40 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #Обработчик нажатий на кнопки
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_handler_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+	logging.info("🚨 ХЕНДЛЕР ВЫЗВАН!")  
 	query = update.callback_query  # Получаем данные о нажатии
 	await query.answer()           # Убираем "часики" на кнопке в ТГ
 
 # Вытаскиваем ту самую "метку" (callback_data)
 # Например, если нажали первую кнопку, data будет "action:text"
 	data = query.data
-
-	if data == "action:helloButton": # Обработка нажатии кнопки
-		await helloButton(update, context)
-		await context.bot.send_message(
+	
+	print("🔥 menu:llm ВЫЗВАН!")  # 👈 ЭТОГО НЕТ В ЛОГАХ!
+	match data:
+		case "menu:llm":
+			logging.info("Кнопка LLM нажата")
+		case "menu:text2image":
+			pass
+		case "menu:text2video":
+			pass
+		case "menu:second2all":
+			pass
+		case "menu:helloButton":
+			await helloButton(update, context)
+			await context.bot.send_message(
 				chat_id=update.effective_chat.id,
 				text="Продолжим ?",
 				reply_markup=view.create_bot_menu()
-		)
+			)
+		case "menu:buttonInfoBot":
+			await buttonInfoBot(update, context)
+
+"""
+	if data == "action:helloButton": # Обработка нажатии кнопки
 	elif data == "action:activateChatGPT":
 		await activateChatGPT(update, context)
-
+"""
 
 
 
@@ -56,11 +90,15 @@ TOKEN = '8342225271:AAG21KFoKOsJPl9fxvyHEDXkw8_LD8uZJ9A'
 
 if __name__ == '__main__':
 	application = ApplicationBuilder().token(TOKEN).build()
+	init_db()
 
 	start_handler = CommandHandler('start', start)
+	auten_handler = get_authenticate_handler()
 	application.add_handler(start_handler)
 
-	application.add_handler(CallbackQueryHandler(button_handler, pattern="^action:"))
+
+	application.add_handler(auten_handler)
+	application.add_handler(CallbackQueryHandler(button_handler_menu, pattern="^menu:"))
 
 	print("Поехали")
 	application.run_polling()

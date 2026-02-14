@@ -2,9 +2,11 @@ services:
 
   telegram_bot:
     build: ./
-    container_name: telegramr-bot
+    container_name: telegram-bot
     depends_on:
        - db
+    environment:
+       DB_DSN: postgresql://bot_tg:1234@postgres18-db:5432/botdb
 
 
   db:
