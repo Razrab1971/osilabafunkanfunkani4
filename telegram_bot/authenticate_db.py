@@ -144,7 +144,46 @@ async def set_name_user(
 
 		return False;
 	except Exception as e:
+		logging.info(f"Не удалось изменить на новое имя {e}")
 		return True;
 
+# Статус пользователя в системе {Разработчик, Пользователь, Забанен }
+async def get_type_user(
+	db: ManagerDB,
+	user_id: str
+) -> str | None:
+	try:
+
+		record = await db.fetch(
+			'SELECT type_user FROM users WHERE id = $1',
+			user_id
+		)
+
+		if record and record[0][0] is not None:
+			return record[0][0];
+	except Exception as e:
+		logging.info(f"Ошибка при получении статуса пользователя {e}")
+	
+	return None
+
+
+# Проверка пользователя
+async def check_user(
+	db: ManagerDB,
+	user_id: str
+) -> bool:
+	stat = await get_type_user(db, user_id)
+	logging.info(f'{user_id} -Статус- {stat}')
+	return stat;
+
+async def check_user_ban(
+	db: ManagerDB,
+	update: Update
+) -> bool:
+	return await check_user(db, get_user_id(update)) == 'Забанен';
+
+
+		
+	
 
 
