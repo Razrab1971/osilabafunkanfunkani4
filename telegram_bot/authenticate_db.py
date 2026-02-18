@@ -182,6 +182,12 @@ async def check_user_ban(
 ) -> bool:
 	return await check_user(db, get_user_id(update)) == 'Забанен';
 
+async def check_user_no_pro(
+	db: ManagerDB,
+	update: Update
+) -> bool:
+	return await check_user(db, get_user_id(update)) != 'Разработчик';
+
 
 		
 	

@@ -1,6 +1,6 @@
 import logging
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler 
 
 from authenticate_db import init_db, get_main_db, get_user_id, registrate_user, check_user_ban
 
@@ -11,7 +11,9 @@ import view
 # Создавать свой файл с логикой функции по типу раздела {LLM, text2image, text2video, second2all}
 from buttons.helloButton import helloButton, buttonInfoBot
 from buttons.buttonsLLM import * 
+
 from commands.authenticate import get_setname_user_handler, get_activate_user_handler_func
+from commands.prog_command import get_commands_func
 
 
 
@@ -94,6 +96,7 @@ if __name__ == '__main__':
 	auten_handler = get_setname_user_handler()
 	
 	get_activate_user_handler_func(application)
+	get_commands_func(application)
 
 	application.add_handler(start_handler, group=1)
 

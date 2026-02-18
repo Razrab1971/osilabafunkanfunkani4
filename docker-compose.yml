@@ -2,9 +2,14 @@ services:
 
   telegram_bot:
     build: ./
-    container_name: telegram-bot
+    deploy:
+      resources:
+        limits:
+          cpus: '1.2'
+          memory: 1024M
     depends_on:
        - db
+    container_name: telegram-bot
     environment:
        DB_DSN: postgresql://bot_tg:1234@postgres18-db:5432/botdb
 
@@ -15,7 +20,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
+          cpus: '0.3'
           memory: 1024M
     restart: 'always'
     secrets:

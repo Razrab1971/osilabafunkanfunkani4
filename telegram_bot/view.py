@@ -48,3 +48,13 @@ def create_bot_menu_choice_llm():
 	 ))
 
 
+#Создание меню для разработчика
+def create_bot_menu_commands_razrab():
+	return InlineKeyboardMarkup(menu_build(
+		[	#Добавление ботов
+			InlineKeyboardButton("Включить логи", callback_data="commands:start_logs"),
+			InlineKeyboardButton("Общее число пользователей", callback_data="commands:list_users")
+		],
+		n_cols=2 #Число кнопок в колонке
+	 ))
+
