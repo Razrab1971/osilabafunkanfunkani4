@@ -7,11 +7,18 @@ services:
         limits:
           cpus: '1.2'
           memory: 1024M
+    restart: 'unless-stopped'
     depends_on:
        - db
     container_name: telegram-bot
     environment:
        DB_DSN: postgresql://bot_tg:1234@postgres18-db:5432/botdb
+    # Настройка логов
+    logging:
+       driver: "json-file"
+       options:
+        max-size: "10m"
+        max-file: "3"
 
 
   db:
@@ -22,7 +29,7 @@ services:
         limits:
           cpus: '0.3'
           memory: 1024M
-    restart: 'always'
+    restart: 'unless-stopped'
     secrets:
       - db-password
     user: postgres
@@ -32,19 +39,28 @@ services:
         - POSTGRES_DB=botdb 
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+        - PGDATA=/var/lib/postgresql/data
     expose:
         - 5432 # Пока только слушает этот порт и не отвечает
     healthcheck:
       test: [ "CMD", "pg_isready" ]
-      interval: 10s
+      interval: 10m
       timeout: 5s
       retries: 5
     # Настройка окружения и запуск
     volumes:
       - ./db/start-db.sh:/start-db.sh
       - ./db/start.sql:/start.sql
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql
     entrypoint: "/bin/bash /start-db.sh"
+    # Настройка логов
+    logging:
+       driver: "json-file"
+       options:
+        max-size: "20m"
+        max-file: "1"
+
+
              
              
              
