@@ -1,10 +1,10 @@
 import asyncio
 import asyncpg
 import threading
-import os
 from typing import Dict, Optional
 
 
+import os
 import subprocess
 import logging
 
