@@ -41,3 +41,11 @@ INSERT INTO type_user(text) VALUES
 -- У бота есть права на существующие таблицы
 GRANT CONNECT ON DATABASE botdb TO bot_tg;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO bot_tg;
+
+CREATE TABLE IF NOT EXISTS user_llm_settings (
+    user_id TEXT PRIMARY KEY,
+    provider TEXT NOT NULL DEFAULT 'stub',
+    model TEXT NOT NULL DEFAULT 'default',
+    temperature REAL NOT NULL DEFAULT 0.7
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE user_llm_settings TO bot_tg;

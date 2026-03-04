@@ -1,5 +1,6 @@
 from typing import Union, List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from registry import list_bots
 
 #Создание меню
 """
@@ -22,6 +23,17 @@ def menu_build(
 		menu.append(footer_buttons if isinstance(footer_buttons, list) else [footer_buttons] )
 	return menu
 
+def create_llm_models_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("LLM: default", callback_data="llm:set_model:default")],
+        [InlineKeyboardButton("LLM: fast", callback_data="llm:set_model:fast")],
+        [InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit")]
+    ])
+
+def create_llm_chat_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit")]
+    ])
 
 
 #Функция для выбора типа бота
@@ -40,12 +52,10 @@ def create_bot_menu():
 
 #Создание меню для llm
 def create_bot_menu_choice_llm():
-	return InlineKeyboardMarkup(menu_build(
-		[	#Добавление ботов
-			InlineKeyboardButton("chatGPT", callback_data="action:activateChatGPT")
-		],
-		n_cols=2 #Число кнопок в колонке
-	 ))
+    bots = list_bots("llm")
+    buttons = [InlineKeyboardButton(spec.title, callback_data=f"bot:activate:{bot_id}") for bot_id, spec in bots]
+    buttons.append(InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit"))
+    return InlineKeyboardMarkup(menu_build(buttons, n_cols=2))
 
 
 #Создание меню для разработчика
@@ -57,4 +67,32 @@ def create_bot_menu_commands_razrab():
 		],
 		n_cols=2 #Число кнопок в колонке
 	 ))
+
+def create_llm_settings_menu(current_provider: str, current_model: str, temperature: float):
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(f"Провайдер: {current_provider}", callback_data="llm:open_provider")],
+        [InlineKeyboardButton(f"Модель: {current_model}", callback_data="llm:open_models")],
+        [InlineKeyboardButton(f"Температура: {temperature:.1f}", callback_data="llm:open_temp")],
+        [InlineKeyboardButton("➡️ В чат", callback_data="llm:enter_chat")],
+        [InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit")],
+    ])
+
+def create_llm_temperature_menu(current: float):
+    # шаг 0.1 в пределах [0.0..1.0]
+    opts = []
+    for v in [0.0, 0.2, 0.5, 0.7, 1.0]:
+        label = f"{v:.1f}" + (" ✅" if abs(v - current) < 1e-9 else "")
+        opts.append([InlineKeyboardButton(label, callback_data=f"llm:set_temp:{v}")])
+
+    opts.append([InlineKeyboardButton("⬅️ Назад", callback_data="llm:settings")])
+    return InlineKeyboardMarkup(opts)
+
+def create_llm_provider_menu(current: str):
+    providers = ["stub", "stub_fast"]
+    rows = []
+    for p in providers:
+        label = p + (" ✅" if p == current else "")
+        rows.append([InlineKeyboardButton(label, callback_data=f"llm:set_provider:{p}")])
+    rows.append([InlineKeyboardButton("⬅️ Назад", callback_data="llm:settings")])
+    return InlineKeyboardMarkup(rows)
 

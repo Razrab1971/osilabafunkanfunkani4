@@ -1,4 +1,5 @@
 import logging
+from script_bot.script_manager import SCRIPT_MANAGER
 
 from typing import Dict
 import re
@@ -61,7 +62,13 @@ class TelegramUserBotHandler(logging.Handler):
 		super().__init__();
 		self.update = update
 		self.context = context
-		self.ignore_pattern = re.compile(r'HTTP Request|HTTP Response|api\.telegram\.org')
+		self.ignore_pattern = re.compile(
+            r'HTTP Request|HTTP Response|api\.telegram\.org|'
+            r'STARTING APPLICATION SETUP|APPLICATION SETUP COMPLETE|'
+            r'Starting polling|Polling stopped|Application started|Application stopped|'
+            r'JobQueue|apscheduler',
+            re.IGNORECASE
+        )
 
 	def emit(self, record):
 		msg = record.getMessage()
@@ -147,17 +154,21 @@ async def button_commands_handler(update: Update, context=ContextTypes.DEFAULT_T
 
 
 async def command_list(update: Update, context=ContextTypes.DEFAULT_TYPE):
-	await update.message.reply_text(
-	#chat_id=update.effective_chat.id,
-	text=(
-		f"/clist - вызывает эту справку\n"
-		f"\n"
-		f"\n"
-		f"/setname - меняет имя в БД\n"
-		f"/command - панель разработчика\n"
-		f"/elog - выключает Логирование\n"
-		f"\n"
-	))
+    await update.message.reply_text(
+        text=(
+            f"/clist - вызывает эту справку\n"
+            f"/setname - меняет имя в БД\n"
+            f"/command - панель разработчика\n"
+            f"/elog - выключает Логирование\n"
+            f"\n"
+            f"/general_script - прислать шаблон .script\n"
+            f"/script_run - ожидать .script файл\n"
+            f"/sexit - остановить текущий скрипт\n"
+            f"\n"
+            f"=== SCRIPT STATUS ===\n"
+            f"{SCRIPT_MANAGER.summary_text()}\n"
+        )
+    )
 
 
 
