@@ -14,18 +14,18 @@ class ScriptManager:
 
     def __init__(self) -> None:
         self._tasks: Dict[int, asyncio.Task] = {}
-        self._info: Dict[int, ScriptInfo] = {}
+        self._info: Dict[str, ScriptInfo] = {}
 
-    def is_running(self, user_id: int) -> bool:
+    def is_running(self, user_id: str) -> bool:
         info = self._info.get(user_id)
         return bool(info and getattr(info, "is_running", False))
 
-    def is_cancel_requested(self, user_id: int) -> bool:
+    def is_cancel_requested(self, user_id: str) -> bool:
         info = self._info.get(user_id)
         # совместимость: если в ScriptInfo нет cancel_requested — считаем False
         return bool(info and getattr(info, "cancel_requested", False))
 
-    def mark_starting(self, user_id: int) -> None:
+    def mark_starting(self, user_id: str) -> None:
         """
         Вызываем СРАЗУ, как только приняли .script и начали обработку (скачивание/парсинг),
         чтобы /sexit и повторный /script_run работали корректно.
@@ -37,7 +37,7 @@ class ScriptManager:
             info.cancel_requested = False
         self._info[user_id] = info
 
-    def start(self, user_id: int, task: asyncio.Task) -> None:
+    def start(self, user_id: str, task: asyncio.Task) -> None:
         self._tasks[user_id] = task
 
         info = self._info.get(user_id)
@@ -64,7 +64,7 @@ class ScriptManager:
 
         task.add_done_callback(_cleanup)
 
-    def finish(self, user_id: int, last_error: Optional[str] = None) -> None:
+    def finish(self, user_id: str, last_error: Optional[str] = None) -> None:
         """
         Завершить "раннюю" активность (например ошибка парсинга или отмена до старта task).
         """
@@ -76,7 +76,7 @@ class ScriptManager:
 
         self._tasks.pop(user_id, None)
 
-    def cancel(self, user_id: int) -> bool:
+    def cancel(self, user_id: str) -> bool:
         """
         Отмена должна сработать даже если task ещё не создан (идёт скачивание/парсинг).
         """

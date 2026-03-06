@@ -3,18 +3,18 @@
 set -e
 
 # Флаг инициализации
-INIT_FLAG="/var/lib/postgresql/data/.init_done"
-
-docker-entrypoint.sh postgres &
-PG_PID=$!
-
-
-until pg_isready -U postgres; do sleep 1; done
+INIT_FLAG="/var/lib/postgresql/data/PG_VERSION"
+PG_PID=""
 
 
 if [ ! -f "$INIT_FLAG" ]; then
     echo "🔵 ПЕРВЫЙ ЗАПУСК - выполняем инициализацию"
 	
+	docker-entrypoint.sh postgres &
+	PG_PID=$!
+	
+	until pg_isready -U postgres; do sleep 5; done
+
 	if psql -U postgres -d botdb -f start.sql; then
 		echo "Запуск успешный"
 	else
@@ -22,6 +22,10 @@ if [ ! -f "$INIT_FLAG" ]; then
 	fi
 
 else
+
+	docker-entrypoint.sh postgres &
+	PG_PID=$!
+
 	echo "🍺 Штатный запуск"
 
 fi

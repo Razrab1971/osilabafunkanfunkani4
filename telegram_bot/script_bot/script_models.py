@@ -23,7 +23,7 @@ class ScriptStep:
 
 @dataclass
 class ScriptInfo:
-    user_id: int
+    user_id: str
     is_running: bool = False
     last_error: Optional[str] = None
     cancel_requested: bool = False

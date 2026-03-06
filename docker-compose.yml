@@ -12,7 +12,7 @@ services:
        - db
     container_name: telegram-bot
     environment:
-       DB_DSN: postgresql://bot_tg:1234@postgres18-db:5432/botdb
+       DB_DSN: postgresql://bot_tg:1234vushelzaiqyugulat@postgres18-db:5432/botdb
     # Настройка логов
     logging:
        driver: "json-file"

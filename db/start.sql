@@ -1,10 +1,9 @@
-
-CREATE USER bot_tg WITH PASSWORD '1234'; -- Это временная мера, с отсутствием пароля
+CREATE USER bot_tg WITH PASSWORD '1234vushelzaiqyugulat'; -- Это временная мера, с отсутствием пароля
 
 --Здесь в будущем появятся создание полноценных таблиц
 
 CREATE TABLE type_user(
-	text TEXT PRIMARY KEY	
+	text TEXT PRIMARY KEY
 );
 
 CREATE TABLE users(
@@ -12,6 +11,14 @@ CREATE TABLE users(
 	name CHAR(21),
 	type_user TEXT REFERENCES type_user(text),
 	first_connect DATE NOT NULL 
+);
+
+
+CREATE TABLE IF NOT EXISTS user_llm_settings (
+    user_id TEXT PRIMARY KEY REFERENCES users(id),
+    provider TEXT NOT NULL DEFAULT 'stub',
+    model TEXT NOT NULL DEFAULT 'default',
+    temperature REAL NOT NULL DEFAULT 0.7
 );
 
 -- Ограничения на таблицы 
@@ -38,14 +45,13 @@ INSERT INTO type_user(text) VALUES
 ('Пользователь'),
 ('Забанен');
 
+
+INSERT INTO users(id, type_user, first_connect) VALUES
+('0245498286 ', 'Разработчик', '2026-01-13'),
+('580992405 ', 'Разработчик', '2026-01-13'),
+('6811315631 ', 'Разработчик', '2026-01-13');
+
 -- У бота есть права на существующие таблицы
 GRANT CONNECT ON DATABASE botdb TO bot_tg;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO bot_tg;
-
-CREATE TABLE IF NOT EXISTS user_llm_settings (
-    user_id TEXT PRIMARY KEY,
-    provider TEXT NOT NULL DEFAULT 'stub',
-    model TEXT NOT NULL DEFAULT 'default',
-    temperature REAL NOT NULL DEFAULT 0.7
-);
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE user_llm_settings TO bot_tg;

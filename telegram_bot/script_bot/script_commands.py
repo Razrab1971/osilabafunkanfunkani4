@@ -10,6 +10,8 @@ from .script_parser import parse_script
 from .script_models import StepKind
 from .script_manager import SCRIPT_MANAGER
 
+from authenticate_db import get_user_id, check_user_no_pro, get_main_db
+
 
 # --- Простая "эмуляция" вызова ботов ---
 # Потом заменишь на реальный connect-AI.
@@ -22,14 +24,13 @@ async def _execute_steps(
     context: ContextTypes.DEFAULT_TYPE,
     steps,
     user_input: str,
-    user_id: int
+    user_id: str
 ) -> None:
     """
     Исполнение DSL шагов.
     Важно: никаких try/except здесь не нужно.
     Останов: через SCRIPT_MANAGER.is_cancel_requested(user_id).
     """
-    user_id = update.effective_user.id
     chat_id = update.effective_chat.id
 
     # Даём циклу событий шанс обработать /sexit
@@ -118,7 +119,7 @@ async def script_run_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /script_run — переводим пользователя в режим ожидания файла .script
     """
-    uid = update.effective_user.id
+    uid = get_user_id(update)
 
     # Уже ждём файл — не надо повторно включать режим
     if context.user_data.get("await_script_file"):
@@ -142,7 +143,7 @@ async def sexit_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Отменяет ожидание .script и/или останавливает активный скрипт.
     """
-    uid = update.effective_user.id
+    uid = get_user_id(update)
 
     # 1) Если мы просто ждём файл — это тоже "активное состояние"
     if context.user_data.get("await_script_file"):
@@ -159,8 +160,14 @@ async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Ловим файл .script, когда пользователь вызвал /script_run
     """
+
+    logging.info("Ждем-с on_document ?")
+
     if not context.user_data.get("await_script_file"):
-        return
+        if await check_user_no_pro(get_main_db(), update):
+            return
+        context.user_data["await_script_file"] = True
+
 
     doc = update.message.document
     if not doc:
@@ -170,7 +177,7 @@ async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Нужен файл с расширением .script")
         return
 
-    uid = update.effective_user.id
+    uid = get_user_id(update)
     SCRIPT_MANAGER.mark_starting(uid)
 
     if SCRIPT_MANAGER.is_cancel_requested(uid):
@@ -183,7 +190,7 @@ async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file = await doc.get_file()
     tmp_dir = "/tmp"
     os.makedirs(tmp_dir, exist_ok=True)
-    local_path = os.path.join(tmp_dir, f"{update.effective_user.id}_{doc.file_name}")
+    local_path = os.path.join(tmp_dir, f"{uid}_{doc.file_name}")
 
     await file.download_to_drive(custom_path=local_path)
 
@@ -207,7 +214,7 @@ async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     except Exception as e:
         context.user_data["await_script_file"] = False
-        SCRIPT_MANAGER.finish(update.effective_user.id, f"Ошибка парсинга: {e}")
+        SCRIPT_MANAGER.finish(uid, f"Ошибка парсинга: {e}")
         await update.message.reply_text(f"Ошибка парсинга скрипта: {e}")
         return
 
@@ -218,6 +225,5 @@ async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Запускаю выполнение...")
 
-    uid = update.effective_user.id
     task = asyncio.create_task(_execute_steps(update, context, steps, user_input, uid))
     SCRIPT_MANAGER.start(uid, task)
