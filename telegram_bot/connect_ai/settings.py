@@ -1,5 +1,7 @@
 from authenticate_db import get_main_db
 
+# Возможные будущие настройки
+
 DEFAULTS = {"provider": "stub", "model": "default", "temperature": 0.7}
 
 async def ensure_settings_row(user_id: str) -> None:

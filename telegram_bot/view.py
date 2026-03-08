@@ -2,6 +2,8 @@ from typing import Union, List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from registry import list_bots
 
+from connect_ai.model_ai_core import Model_Type
+
 #Создание меню
 """
 	buttons - массив кнопок
@@ -52,9 +54,9 @@ def create_bot_menu():
 
 #Создание меню для llm
 def create_bot_menu_choice_llm():
-    bots = list_bots("llm")
+    bots = list_bots(Model_Type.LLM)
     buttons = [InlineKeyboardButton(spec.title, callback_data=f"bot:activate:{bot_id}") for bot_id, spec in bots]
-    buttons.append(InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit"))
+    # buttons.append(InlineKeyboardButton("⬅️ В меню", callback_data="llm:exit"))
     return InlineKeyboardMarkup(menu_build(buttons, n_cols=2))
 
 

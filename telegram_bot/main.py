@@ -3,10 +3,12 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
 from authenticate_db import init_db, get_main_db, get_user_id, registrate_user, check_user_ban
-from bots.llm.llm_ui import activate_llm, llm_callback_handler
-from bots.llm.llm_chat import llm_text_handler
+# from bots.llm.llm_ui import activate_llm, llm_callback_handler
+# from bots.llm.llm_chat import llm_text_handler
 from bots_bootstrap import register_all_bots
 from registry import get_bot
+
+from connect_ai.ai_core import interceptor_text_toAI_handler
 
 import view
 
@@ -46,16 +48,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def unknown_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Команда не распознана. Проверь /clist")
 
+
+
+
 async def bot_activate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info("🚨 ХЕНДЛЕР ВЫЗВАН! для включения меню бота")
     q = update.callback_query
     await q.answer()
+
     data = q.data  # bot:activate:<bot_id>
     bot_id = data.split(":", 2)[2]
     spec = get_bot(bot_id)
+
     if not spec:
         await q.edit_message_text("Бот не найден. Обнови меню /start", reply_markup=view.create_bot_menu())
         return
-    await spec.activate(update, context)
+    await spec.activate(update, context, spec.model)
 
 
 #Обработчик нажатий на кнопки
@@ -115,16 +123,26 @@ if __name__ == '__main__':
     get_activate_user_handler_func(application)
     get_commands_func(application)
 
+#Обработка собыий связанных с начальной настройкой (Sart,Auten + главная кнопка с menu)
     application.add_handler(start_handler, group=1)
     application.add_handler(auten_handler, group=1)
     application.add_handler(CallbackQueryHandler(button_handler_menu, pattern="^menu:"), group=1)
-    application.add_handler(CallbackQueryHandler(llm_callback_handler, pattern="^llm:"), group=1)
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, llm_text_handler), group=1)
+
+#Визуализация настройек LLM - llm_callback_handler; llm_text_handler - Перехват сообщений для чата c AI; bot_activate_handler - Какая-то дичь, которая вызывает настройки бота 
+    # application.add_handler(CallbackQueryHandler(llm_callback_handler, pattern="^llm:"), group=1)
+    # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, llm_text_handler), group=1)
+
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interceptor_text_toAI_handler), group=1)
     application.add_handler(CallbackQueryHandler(bot_activate_handler, pattern="^bot:activate:"), group=1)
+
+
+#Работа со скриптами
     application.add_handler(CommandHandler("general_script", general_script_cmd), group=1)
     application.add_handler(CommandHandler("script_run", script_run_cmd), group=1)
     application.add_handler(CommandHandler("sexit", sexit_cmd), group=1)
     application.add_handler(MessageHandler(filters.Document.ALL, on_document), group=1)
+
+#Заглушка на неизвестную команду
     application.add_handler(MessageHandler(filters.COMMAND, unknown_cmd), group=1)
 
     print("Поехали")
