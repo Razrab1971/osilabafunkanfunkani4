@@ -14,6 +14,12 @@ if [ ! -f "$INIT_FLAG" ]; then
 	PG_PID=$!
 	
 	until pg_isready -U postgres; do sleep 5; done
+    
+    DB_PASSWORDMY2=$(< /run/secrets/db-password2)
+    if psql -U postgres -d botdb -c "CREATE USER bot_tg WITH PASSWORD '${DB_PASSWORDMY2}';"; then
+        echo "Добвален пользователь"
+    fi
+
 
 	if psql -U postgres -d botdb -f start.sql; then
 		echo "Запуск успешный"

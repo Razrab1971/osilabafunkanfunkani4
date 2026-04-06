@@ -42,16 +42,24 @@ async def interceptor_text_toAI_handler(update: Update, context: ContextTypes.DE
     
     
     try:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Бот думает ..."
+        )
+
         result = await general_send_message_AI(
             activate_model, Bytes_and_type(text.encode('utf-8'), Data_Type.text)
         )
-
+        
 
         if result.types == Data_Type.text:
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=result.data.decode('utf-8')
+            await update.message.reply_text(
+               text=result.data.decode('utf-8')
             )
+            # await context.bot.send_message(
+            #     chat_id=update.effective_chat.id,
+            #     text=result.data.decode('utf-8')
+            # )
     except ValueError as e:
         logging.warning(f"Запрос к нейросети выкинул заглушку: {e}")
         await context.bot.send_message(

@@ -13,3 +13,4 @@ telegram_bot/*.pyc
 
 #Сам файл
 .dockerignore
+.secrets

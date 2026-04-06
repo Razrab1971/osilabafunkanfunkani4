@@ -1,4 +1,4 @@
-CREATE USER bot_tg WITH PASSWORD '1234vushelzaiqyugulat'; -- Это временная мера, с отсутствием пароля
+-- CREATE USER bot_tg WITH PASSWORD '1234vushelzaiqyugulat'; -- Это временная мера, с отсутствием пароля
 
 --Здесь в будущем появятся создание полноценных таблиц
 
@@ -53,5 +53,6 @@ INSERT INTO users(id, type_user, first_connect) VALUES
 
 -- У бота есть права на существующие таблицы
 GRANT CONNECT ON DATABASE botdb TO bot_tg;
+GRANT USAGE ON SCHEMA public TO bot_tg;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO bot_tg;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE user_llm_settings TO bot_tg;

@@ -9,14 +9,24 @@ services:
           memory: 1024M
     restart: 'unless-stopped'
     depends_on:
-       - db
+      db:
+        condition: service_healthy
     container_name: telegram-bot
     environment:
-       DB_DSN: postgresql://bot_tg:1234vushelzaiqyugulat@postgres18-db:5432/botdb
-    # Настройка логов
+      - DB_USER=bot_tg
+      - DB_NAME=botdb
+      - DB_HOST=postgres18-db
+      - DB_PORT=5432
+      - DB_PASSWORD_FILE=/run/secrets/db-password2
+      - TOKEN_BOT_FILE=/run/secrets/token-bot
+      # Пути к секретам
+    secrets:
+      - db-password2
+      - token-bot
+      # Настройка логов
     logging:
-       driver: "json-file"
-       options:
+      driver: "json-file"
+      options:
         max-size: "10m"
         max-file: "3"
 
@@ -32,6 +42,7 @@ services:
     restart: 'unless-stopped'
     secrets:
       - db-password
+      - db-password2
     user: postgres
     #Сам контейнер
     container_name: postgres18-db
@@ -47,6 +58,7 @@ services:
       interval: 10m
       timeout: 5s
       retries: 5
+      start_period: 40s
     # Настройка окружения и запуск
     volumes:
       - ./db/start-db.sh:/start-db.sh
@@ -70,6 +82,10 @@ services:
 secrets:
   db-password:
     file: .secrets/db-password
+  token-bot:
+    file: .secrets/TOKEN_bot
+  db-password2:
+    file: .secrets/db-password2
 
 volumes:
   db-data:

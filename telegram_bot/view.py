@@ -1,5 +1,6 @@
 from typing import Union, List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import  BotCommand
 from registry import list_bots
 
 from connect_ai.model_ai_core import Model_Type
@@ -42,10 +43,10 @@ def create_llm_chat_menu():
 def create_bot_menu():
 	return InlineKeyboardMarkup(menu_build(
 		[	#Добавление ботов
-			InlineKeyboardButton("LLM", callback_data="menu:llm"),
-			InlineKeyboardButton("Image-s", callback_data="menu:text2image"),
-			InlineKeyboardButton("Video-s", callback_data="menu:text2video"),
-			InlineKeyboardButton("Остальное", callback_data="menu:second2all")
+			InlineKeyboardButton("LLM", callback_data="menu:llm")
+			# InlineKeyboardButton("Image-s", callback_data="menu:text2image"),
+			# InlineKeyboardButton("Video-s", callback_data="menu:text2video"),
+			# InlineKeyboardButton("Остальное", callback_data="menu:second2all")
 		],
 		n_cols=2, #Число кнопок в колонке
 		header_buttons=InlineKeyboardButton("⭐ Приветствие", callback_data="menu:helloButton"), #  action:helloButton - уникальная строка с "action:метод"
@@ -97,4 +98,12 @@ def create_llm_provider_menu(current: str):
         rows.append([InlineKeyboardButton(label, callback_data=f"llm:set_provider:{p}")])
     rows.append([InlineKeyboardButton("⬅️ Назад", callback_data="llm:settings")])
     return InlineKeyboardMarkup(rows)
+
+
+async def create_left_menu_keyboard(app):
+    commands = [
+            BotCommand("start", "Запустить бота 🚀")
+            # Можно добавить до 100 команд
+        ]
+    await app.bot.set_my_commands(commands)
 

@@ -72,12 +72,25 @@ class ManagerDB:
 
 
 def init_db() -> ManagerDB:
-	return ManagerDB("aut-db", os.getenv('DB_DSN'))
+    db_user = os.getenv("DB_USER")
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    
+    try:
+        with open(os.getenv("DB_PASSWORD_FILE"), 'r') as f:
+            db_password = f.read().strip()
+    except FileNotFoundError:
+        logging.warning("Ошибка чтения файла")
+    
+    dsn = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+#    logging.info(dsn)
+    return ManagerDB("aut-db", dsn)
 
 def get_main_db()->ManagerDB:
 	return ManagerDB("aut-db", "");
 
-
+ 
 
 # Вот здесь полезные функции для работы с бд
 

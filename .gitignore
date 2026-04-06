@@ -3,3 +3,11 @@
 
 #Хлам
 venv/*
+
+#Сборка без интересных моментов
+Makefile
+
+#Он не нужен
+.secrets/TOKEN_bot
+.secrets/db-password
+.secrets/db-password2

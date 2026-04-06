@@ -106,15 +106,18 @@ async def button_handler_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 
-
 #Оставлю для тестов ботовотсва
-TOKEN = '8342225271:AAG21KFoKOsJPl9fxvyHEDXkw8_LD8uZJ9A'
-
-
+TOKEN='Смотри что есть в файле или поменяйте'
 
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token(TOKEN).build()
+    with open('/run/secrets/token-bot', 'r', encoding='utf-8') as file:
+        TOKEN = file.read().strip()
+    
+    # Убрал из общего архива папок
+
+
+    application = ApplicationBuilder().token(TOKEN).post_init(view.create_left_menu_keyboard).build()
     init_db()
 
     start_handler = CommandHandler('start', start)
